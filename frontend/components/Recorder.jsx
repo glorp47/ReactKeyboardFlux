@@ -1,6 +1,7 @@
 var React = require('react'),
     Track = require("../util/Track"),
-    KeyStore = require('../stores/KeyStore');
+    KeyStore = require('../stores/KeyStore'),
+    TrackActions = require('../actions/TrackActions');;
 
 var Recorder = React.createClass({
   componentDidMount: function () {
@@ -36,8 +37,6 @@ var Recorder = React.createClass({
   recordingMessage: function () {
     if (this.isRecording()) {
       return "Stop Recording";
-    } else if (this.isDoneRecording()) {
-      return "Record New Session";
     } else {
       return "Start Recording";
     }
@@ -46,6 +45,7 @@ var Recorder = React.createClass({
   recordClick: function (e) {
     if (this.state.recording) {
       this.state.track.completeRecording();
+      this.saveTrack();
       this.setState({ recording: false });
     } else {
       this.setState({ recording: true });
@@ -57,14 +57,10 @@ var Recorder = React.createClass({
     var hasTrack = this.isTrackNew();
 
     return (
-      <div className="recorder">
-        <h3>Recorder</h3>
+      <div className="recorder changer">
+        <h3>RECORDER</h3>
         <button onClick={this.recordClick} className="record-button">
           { this.recordingMessage() }
-        </button>
-        { this.trackSavingElements() }
-        <button onClick={this.playClick} className={this.playClass()}>
-          Play
         </button>
       </div>
     );
@@ -72,7 +68,16 @@ var Recorder = React.createClass({
 
   saveTrack: function (e) {
     this.state.track.set('name', prompt("Type in the saved track name"));
-    this.state.track.save();
+    this.save();
+  },
+
+  save: function () {
+    if (this.state.track.attributes.name === "") {
+      throw "name can't be blank!";
+    } else {
+      TrackActions.addTrack(this.state.track.attributes);
+      this.setState({ track: new Track() });
+    };
   },
 
   trackSavingElements: function () {

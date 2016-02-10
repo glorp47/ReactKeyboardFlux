@@ -11,13 +11,18 @@ $(function () {
   69,
   68,
   70,
+  84,
+  71,
   89,
-  74,
+  72,
   85,
+  74,
   75,
-  73,
+  79,
   76,
-  186
+  80,
+  186,
+  222
   ];
   tones.forEach(function(tone, i) {
     NOTE_MAP[validKeys[i]] = tone;

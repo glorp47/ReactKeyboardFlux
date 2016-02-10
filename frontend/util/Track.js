@@ -99,7 +99,7 @@ Track.prototype = {
     } else if (this.attributes.name === "") {
       throw "name can't be blank!";
     } else {
-      TrackActions.createTrack(this.attributes);
+      TrackActions.addTrack(this.attributes);
     }
   },
 

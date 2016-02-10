@@ -19,7 +19,7 @@ var Organ = React.createClass({
   render: function () {
     var that = this;
     return (
-      <div>
+      <div className="container">
         <div className="keys group">
         {
           Object.keys(TONES).map(function (noteName) {

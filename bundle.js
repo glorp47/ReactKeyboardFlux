@@ -49,7 +49,7 @@
 	    Organ = __webpack_require__(159),
 	    $ = __webpack_require__(191);
 	
-	__webpack_require__(199);
+	__webpack_require__(198);
 	
 	$(function () {
 	    var root = document.getElementById('root');
@@ -19658,8 +19658,8 @@
 	var React = __webpack_require__(1),
 	    NoteKey = __webpack_require__(160),
 	    JukeBox = __webpack_require__(188),
-	    Recorder = __webpack_require__(195),
-	    Controls = __webpack_require__(196),
+	    Recorder = __webpack_require__(194),
+	    Controls = __webpack_require__(195),
 	    TONES = __webpack_require__(187),
 	    KeyStore = __webpack_require__(161),
 	    FilterStore = __webpack_require__(184);
@@ -19679,7 +19679,7 @@
 	    var that = this;
 	    return React.createElement(
 	      'div',
-	      null,
+	      { className: 'container' },
 	      React.createElement(
 	        'div',
 	        { className: 'keys group' },
@@ -26334,8 +26334,7 @@
 	  RESET_TRACKS: "RESET_TRACKS",
 	  DESTROY_TRACK: "DESTROY_TRACK",
 	  VOLUMECHANGED: "VOLUMECHANGED",
-	  WAVEFORMCHANGED: "WAVEFORMCHANGED",
-	  READ_TRACKS: "READ_TRACKS"
+	  WAVEFORMCHANGED: "WAVEFORMCHANGED"
 	};
 	
 	module.exports = OrganConstants;
@@ -26717,14 +26716,6 @@
 	      actionType: OrganConstants.DESTROY_TRACK,
 	      track: track
 	    });
-	  },
-	
-	  readTracks: function (tracks) {
-	    debugger;
-	    AppDispatcher.dispatch({
-	      actionType: OrganConstants.READ_TRACKS,
-	      tracks: tracks
-	    });
 	  }
 	};
 	
@@ -26747,7 +26738,12 @@
 	  "A4": 440.0,
 	  "A#4": 466.16,
 	  "B4": 493.88,
-	  "C5": 523.25
+	  "C5": 523.25,
+	  "C#5": 554.37,
+	  "D5": 587.33,
+	  "D#5": 622.25,
+	  "E5": 659.25,
+	  "F5": 698.46
 	};
 	
 	module.exports = TONES;
@@ -26758,9 +26754,9 @@
 
 	var React = __webpack_require__(1),
 	    TrackStore = __webpack_require__(189),
+	    Track = __webpack_require__(190),
 	    TrackActions = __webpack_require__(186),
-	    TrackApiUtil = __webpack_require__(190),
-	    TrackPlayer = __webpack_require__(194);
+	    TrackPlayer = __webpack_require__(193);
 	
 	var JukeBox = React.createClass({
 	  displayName: 'JukeBox',
@@ -26788,18 +26784,21 @@
 	    return React.createElement(
 	      'div',
 	      { className: 'jukebox' },
+	      React.createElement('br', null),
+	      React.createElement('br', null),
 	      React.createElement(
 	        'h3',
 	        null,
 	        'JUKEBOX'
 	      ),
 	      this.state.tracks.map(function (track) {
-	        return React.createElement(TrackPlayer, { key: track.get('id'), track: track });
+	        return React.createElement(TrackPlayer, { key: track["name"], track: track });
 	      })
 	    );
 	  },
 	
 	  _onChange: function () {
+	    this.state.tracks = TrackStore.all();
 	    this.setState({ tracks: TrackStore.all() });
 	  }
 	});
@@ -26828,44 +26827,20 @@
 	    case OrganConstants.DESTROY_TRACK:
 	      TrackStore._destroyTrack(payload.track);
 	      break;
-	    case OrganConstants.READ_TRACKS:
-	      TrackStore._readTracks(payload.tracks);
-	      break;
 	    default:
 	  }
 	};
 	
-	TrackStore._createCookie = function (name, value) {
-	
-	  var date = new Date();
-	  date.setTime(date.getTime() + 24 * 60 * 60 * 1000);
-	  var expires = "; expires=" + date.toGMTString();
-	
-	  document.cookie = name + "=" + value + expires + "; path=/";
-	};
-	
-	TrackStore._readCookie = function (name) {
-	  var nameEQ = name + "=";
-	  var ca = document.cookie.split(';');
-	  for (var i = 0; i < ca.length; i++) {
-	    var c = ca[i];
-	    while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-	    if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
-	  }
-	  return null;
-	};
-	
 	TrackStore._addTrack = function (track) {
 	  var idx = _tracks.indexOf(track);
-	  if (idx == -1) {
-	    _tracks.push(track);
-	    this.__emitChange();
-	  }
+	  debugger;
+	  _tracks.push(track);
+	  this.__emitChange();
 	};
 	
 	TrackStore._destroyTrack = function (track) {
 	  var idx = _tracks.indexOf(track);
-	  if (idx == -1) {
+	  if (idx !== -1) {
 	    _tracks.splice(idx, 1);
 	    this.__emitChange();
 	  }
@@ -26883,70 +26858,125 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(191),
-	    Track = __webpack_require__(192),
-	    AppDispatcher = __webpack_require__(181),
+	    KeyActions = __webpack_require__(192),
 	    TrackActions = __webpack_require__(186);
 	
-	var TrackApiUtil = {
-	  createTrack: function (track) {
-	    $.ajax({
-	      url: '/api/tracks',
-	      method: 'POST',
-	      data: JSON.stringify({ track: track }),
-	      dataType: 'json',
-	      contentType: "application/json",
+	function Track(attrs) {
+	  var defaults = {
+	    name: "",
+	    roll: []
+	  };
 	
-	      beforeSend: function (xhr) {
-	        xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'));
-	      },
+	  this.attributes = $.extend(defaults, attrs || {});
+	}
 	
-	      success: function (track) {
-	        TrackActions.addTrack(new Track(track));
-	      }
-	    });
+	Track.prototype = {
+	  addNotes: function (notes) {
+	    var timeSlice = { time: this._timeDelta() };
+	    if (notes.length > 0) {
+	      timeSlice.notes = notes;
+	    }
+	    this.attributes.roll.push(timeSlice);
 	  },
 	
-	  fetchTracks: function () {
-	    $.getJSON('/api/tracks', function (trackObjects) {
-	      var tracks = trackObjects.map(function (trackData) {
-	        return new Track(trackData);
-	      });
-	
-	      TrackActions.resetTracks(tracks);
-	    });
+	  completeRecording: function () {
+	    this.addNotes([]);
 	  },
 	
-	  destroyTrack: function (trackId) {
-	    if (!trackId) {
+	  get: function (attr) {
+	    return this.attributes[attr];
+	  },
+	
+	  isBlank: function () {
+	    return this.attributes.roll.length === 0;
+	  },
+	
+	  destroy: function () {
+	    TrackActions.destroyTrack(this.attributes.id);
+	  },
+	
+	  play: function () {
+	    if (this.interval) {
 	      return;
 	    }
-	    $.ajax({
-	      url: "/api/tracks/" + trackId,
-	      type: "DELETE",
-	      beforeSend: function (xhr) {
-	        xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'));
-	      },
-	      success: function (trackId) {
-	        TrackActions.destroyTrack(trackId);
-	      }
-	    });
-	  }
 	
+	    var currentNote = 0,
+	        playBackStartTime = Date.now(),
+	        roll = this.attributes.roll,
+	        delta;
+	
+	    this.interval = setInterval(function () {
+	      if (currentNote < roll.length) {
+	        delta = Date.now() - playBackStartTime;
+	
+	        if (delta >= roll[currentNote].time) {
+	          var notes = roll[currentNote].notes || [];
+	          KeyActions.groupUpdate(notes);
+	          currentNote++;
+	        }
+	      } else {
+	        clearInterval(this.interval);
+	        delete this.interval;
+	      }
+	    }.bind(this), 1);
+	  },
+	
+	  loop: function (continueLoop) {
+	    if (this.interval) {
+	      return;
+	    }
+	
+	    var currentNote = 0,
+	        playBackStartTime = Date.now(),
+	        roll = this.attributes.roll,
+	        delta;
+	
+	    this.interval = setInterval(function () {
+	      if (currentNote < roll.length) {
+	        delta = Date.now() - playBackStartTime;
+	
+	        if (delta >= roll[currentNote].time) {
+	          var notes = roll[currentNote].notes || [];
+	          KeyActions.groupUpdate(notes);
+	          currentNote++;
+	        }
+	      } else {
+	        clearInterval(this.interval);
+	        delete this.interval;
+	        this.loop(continueLoop);
+	      }
+	    }.bind(this), 1);
+	  },
+	
+	  stop: function () {
+	    clearInterval(this.interval);
+	  },
+	
+	  set: function (attr, val) {
+	    this.attributes[attr] = val;
+	  },
+	
+	  save: function () {
+	    if (this.isBlank()) {
+	      throw "track can't be blank!";
+	    } else if (this.attributes.name === "") {
+	      throw "name can't be blank!";
+	    } else {
+	      TrackActions.addTrack(this.attributes);
+	    }
+	  },
+	
+	  startRecording: function () {
+	    this.attributes.roll = [];
+	    this.start = Date.now();
+	  },
+	
+	  _timeDelta: function () {
+	    return Date.now() - this.start;
+	  }
 	};
 	
-	AppDispatcher.register(function (payload) {
-	  switch (payload.actionType) {
-	    case OrganConstants.CREATE_TRACK:
-	      TrackApiUtil.createTrack(payload.track);
-	      break;
-	    case OrganConstants.DESTROY_TRACK:
-	      TrackApiUtil.destroyTrack(payload.track);
-	      break;
-	    default:
-	  }
-	});
-	
-	module.exports = TrackApiUtil;
+	module.exports = Track;
 
 /***/ },
 /* 191 */
@@ -36789,131 +36819,6 @@
 /* 192 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var $ = __webpack_require__(191),
-	    KeyActions = __webpack_require__(193),
-	    TrackActions = __webpack_require__(186);
-	
-	function Track(attrs) {
-	  var defaults = {
-	    name: "",
-	    roll: []
-	  };
-	
-	  this.attributes = $.extend(defaults, attrs || {});
-	}
-	
-	Track.prototype = {
-	  addNotes: function (notes) {
-	    var timeSlice = { time: this._timeDelta() };
-	    if (notes.length > 0) {
-	      timeSlice.notes = notes;
-	    }
-	    this.attributes.roll.push(timeSlice);
-	  },
-	
-	  completeRecording: function () {
-	    this.addNotes([]);
-	  },
-	
-	  get: function (attr) {
-	    return this.attributes[attr];
-	  },
-	
-	  isBlank: function () {
-	    return this.attributes.roll.length === 0;
-	  },
-	
-	  destroy: function () {
-	    TrackActions.destroyTrack(this.attributes.id);
-	  },
-	
-	  play: function () {
-	    if (this.interval) {
-	      return;
-	    }
-	
-	    var currentNote = 0,
-	        playBackStartTime = Date.now(),
-	        roll = this.attributes.roll,
-	        delta;
-	
-	    this.interval = setInterval(function () {
-	      if (currentNote < roll.length) {
-	        delta = Date.now() - playBackStartTime;
-	
-	        if (delta >= roll[currentNote].time) {
-	          var notes = roll[currentNote].notes || [];
-	          KeyActions.groupUpdate(notes);
-	          currentNote++;
-	        }
-	      } else {
-	        clearInterval(this.interval);
-	        delete this.interval;
-	      }
-	    }.bind(this), 1);
-	  },
-	
-	  loop: function (continueLoop) {
-	    if (this.interval) {
-	      return;
-	    }
-	
-	    var currentNote = 0,
-	        playBackStartTime = Date.now(),
-	        roll = this.attributes.roll,
-	        delta;
-	
-	    this.interval = setInterval(function () {
-	      if (currentNote < roll.length) {
-	        delta = Date.now() - playBackStartTime;
-	
-	        if (delta >= roll[currentNote].time) {
-	          var notes = roll[currentNote].notes || [];
-	          KeyActions.groupUpdate(notes);
-	          currentNote++;
-	        }
-	      } else {
-	        clearInterval(this.interval);
-	        delete this.interval;
-	        this.loop(continueLoop);
-	      }
-	    }.bind(this), 1);
-	  },
-	
-	  stop: function () {
-	    clearInterval(this.interval);
-	  },
-	
-	  set: function (attr, val) {
-	    this.attributes[attr] = val;
-	  },
-	
-	  save: function () {
-	    if (this.isBlank()) {
-	      throw "track can't be blank!";
-	    } else if (this.attributes.name === "") {
-	      throw "name can't be blank!";
-	    } else {
-	      TrackActions.createTrack(this.attributes);
-	    }
-	  },
-	
-	  startRecording: function () {
-	    this.attributes.roll = [];
-	    this.start = Date.now();
-	  },
-	
-	  _timeDelta: function () {
-	    return Date.now() - this.start;
-	  }
-	};
-	
-	module.exports = Track;
-
-/***/ },
-/* 193 */
-/***/ function(module, exports, __webpack_require__) {
-
 	var AppDispatcher = __webpack_require__(181),
 	    OrganConstants = __webpack_require__(180);
 	
@@ -36943,13 +36848,15 @@
 	module.exports = KeyActions;
 
 /***/ },
-/* 194 */
+/* 193 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var React = __webpack_require__(1);
+	var React = __webpack_require__(1),
+	    Track = __webpack_require__(190),
+	    TrackActions = __webpack_require__(186);
 	
 	var TrackPlayer = React.createClass({
-	  displayName: "TrackPlayer",
+	  displayName: 'TrackPlayer',
 	
 	  getInitialState: function () {
 	    return { looping: false };
@@ -36960,11 +36867,15 @@
 	  },
 	
 	  playClick: function () {
-	    this.props.track.play();
+	    this.play();
 	  },
 	
 	  destroyClick: function () {
-	    this.props.track.destroy();
+	    this.destroy();
+	  },
+	
+	  destroy: function () {
+	    TrackActions.destroyTrack(this.props.track);
 	  },
 	
 	  loopMessage: function () {
@@ -36985,6 +36896,32 @@
 	    }
 	  },
 	
+	  play: function () {
+	    if (this.interval) {
+	      return;
+	    }
+	
+	    var currentNote = 0,
+	        playBackStartTime = Date.now(),
+	        roll = this.props.track["roll"],
+	        delta;
+	
+	    this.interval = setInterval(function () {
+	      if (currentNote < roll.length) {
+	        delta = Date.now() - playBackStartTime;
+	
+	        if (delta >= roll[currentNote].time) {
+	          var notes = roll[currentNote].notes || [];
+	          KeyActions.groupUpdate(notes);
+	          currentNote++;
+	        }
+	      } else {
+	        clearInterval(this.interval);
+	        delete this.interval;
+	      }
+	    }.bind(this), 1);
+	  },
+	
 	  loop: function () {
 	    if (this.interval) {
 	      return;
@@ -36992,7 +36929,7 @@
 	
 	    var currentNote = 0,
 	        playBackStartTime = Date.now(),
-	        roll = this.props.track.attributes.roll,
+	        roll = this.props.track["roll"],
 	        delta;
 	
 	    this.interval = setInterval(function () {
@@ -37017,27 +36954,28 @@
 	  render: function () {
 	
 	    return React.createElement(
-	      "div",
-	      { className: "track" },
+	      'div',
+	      { className: 'track' },
 	      React.createElement(
-	        "p",
-	        { className: "track-name" },
-	        this.props.track.get('name')
+	        'p',
+	        { className: 'track-name' },
+	        this.props.track.name,
+	        ':'
 	      ),
 	      React.createElement(
-	        "button",
+	        'button',
 	        { onClick: this.playClick },
-	        "Play"
+	        'Play'
 	      ),
 	      React.createElement(
-	        "button",
+	        'button',
 	        { onClick: this.loopClick },
 	        this.loopMessage()
 	      ),
 	      React.createElement(
-	        "button",
+	        'button',
 	        { onClick: this.destroyClick },
-	        "Delete"
+	        'Delete'
 	      )
 	    );
 	  }
@@ -37047,12 +36985,13 @@
 	module.exports = TrackPlayer;
 
 /***/ },
-/* 195 */
+/* 194 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var React = __webpack_require__(1),
-	    Track = __webpack_require__(192),
-	    KeyStore = __webpack_require__(161);
+	    Track = __webpack_require__(190),
+	    KeyStore = __webpack_require__(161),
+	    TrackActions = __webpack_require__(186);;
 	
 	var Recorder = React.createClass({
 	  displayName: 'Recorder',
@@ -37090,8 +37029,6 @@
 	  recordingMessage: function () {
 	    if (this.isRecording()) {
 	      return "Stop Recording";
-	    } else if (this.isDoneRecording()) {
-	      return "Record New Session";
 	    } else {
 	      return "Start Recording";
 	    }
@@ -37100,6 +37037,7 @@
 	  recordClick: function (e) {
 	    if (this.state.recording) {
 	      this.state.track.completeRecording();
+	      this.saveTrack();
 	      this.setState({ recording: false });
 	    } else {
 	      this.setState({ recording: true });
@@ -37112,29 +37050,32 @@
 	
 	    return React.createElement(
 	      'div',
-	      { className: 'recorder' },
+	      { className: 'recorder changer' },
 	      React.createElement(
 	        'h3',
 	        null,
-	        'Recorder'
+	        'RECORDER'
 	      ),
 	      React.createElement(
 	        'button',
 	        { onClick: this.recordClick, className: 'record-button' },
 	        this.recordingMessage()
-	      ),
-	      this.trackSavingElements(),
-	      React.createElement(
-	        'button',
-	        { onClick: this.playClick, className: this.playClass() },
-	        'Play'
 	      )
 	    );
 	  },
 	
 	  saveTrack: function (e) {
 	    this.state.track.set('name', prompt("Type in the saved track name"));
-	    this.state.track.save();
+	    this.save();
+	  },
+	
+	  save: function () {
+	    if (this.state.track.attributes.name === "") {
+	      throw "name can't be blank!";
+	    } else {
+	      TrackActions.addTrack(this.state.track.attributes);
+	      this.setState({ track: new Track() });
+	    };
 	  },
 	
 	  trackSavingElements: function () {
@@ -37157,13 +37098,13 @@
 	module.exports = Recorder;
 
 /***/ },
-/* 196 */
+/* 195 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var React = __webpack_require__(1),
-	    FilterActions = __webpack_require__(197),
+	    FilterActions = __webpack_require__(196),
 	    FilterStore = __webpack_require__(184),
-	    ReactSlider = __webpack_require__(198);
+	    ReactSlider = __webpack_require__(197);
 	
 	var Controls = React.createClass({
 	  displayName: 'Controls',
@@ -37190,7 +37131,7 @@
 	      { className: 'controls' },
 	      React.createElement(
 	        'div',
-	        { className: 'volume' },
+	        { className: 'volume changer' },
 	        React.createElement(
 	          'h3',
 	          null,
@@ -37200,12 +37141,13 @@
 	        React.createElement(
 	          'span',
 	          { id: 'range' },
-	          this.state.volume
+	          ' ',
+	          this.state.volume.toFixed(1)
 	        )
 	      ),
 	      React.createElement(
 	        'div',
-	        { className: 'waveform' },
+	        { className: 'waveform changer' },
 	        React.createElement(
 	          'h3',
 	          null,
@@ -37244,7 +37186,7 @@
 	module.exports = Controls;
 
 /***/ },
-/* 197 */
+/* 196 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var AppDispatcher = __webpack_require__(181),
@@ -37270,7 +37212,7 @@
 	module.exports = FilterActions;
 
 /***/ },
-/* 198 */
+/* 197 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (root, factory) {
@@ -38068,16 +38010,16 @@
 
 
 /***/ },
-/* 199 */
+/* 198 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(191);
-	KeyActions = __webpack_require__(193), TONES = __webpack_require__(187);
+	KeyActions = __webpack_require__(192), TONES = __webpack_require__(187);
 	
 	$(function () {
 	  var NOTE_MAP = {},
 	      tones = Object.keys(window.TONES);
-	  var validKeys = [65, 87, 83, 69, 68, 70, 89, 74, 85, 75, 73, 76, 186];
+	  var validKeys = [65, 87, 83, 69, 68, 70, 84, 71, 89, 72, 85, 74, 75, 79, 76, 80, 186, 222];
 	  tones.forEach(function (tone, i) {
 	    NOTE_MAP[validKeys[i]] = tone;
 	  });

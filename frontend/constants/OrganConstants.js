@@ -10,7 +10,6 @@ var OrganConstants = {
   DESTROY_TRACK: "DESTROY_TRACK",
   VOLUMECHANGED: "VOLUMECHANGED",
   WAVEFORMCHANGED: "WAVEFORMCHANGED",
-  READ_TRACKS: "READ_TRACKS"
 };
 
 module.exports = OrganConstants;

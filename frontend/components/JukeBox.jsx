@@ -1,7 +1,7 @@
 var React = require('react'),
     TrackStore = require('../stores/TrackStore'),
+    Track = require('../util/Track'),
     TrackActions = require('../actions/TrackActions'),
-    TrackApiUtil = require('../util/TrackApiUtil'),
     TrackPlayer = require('../components/TrackPlayer');
 
 var JukeBox = React.createClass({
@@ -26,11 +26,11 @@ var JukeBox = React.createClass({
 
   render: function () {
     return (
-      <div className="jukebox">
+      <div className="jukebox"><br/><br/>
         <h3>JUKEBOX</h3>
         {
           this.state.tracks.map(function (track) {
-            return <TrackPlayer key={track.get('id')} track={track}/>
+            return <TrackPlayer key={track["name"]} track={track}/>
           })
         }
       </div>
@@ -38,6 +38,7 @@ var JukeBox = React.createClass({
   },
 
   _onChange: function () {
+    this.state.tracks = TrackStore.all();
     this.setState({ tracks: TrackStore.all() });
   }
 });

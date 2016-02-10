@@ -1,4 +1,6 @@
-var React = require("react");
+var React = require("react"),
+    Track = require('../util/Track'),
+    TrackActions = require('../actions/TrackActions');
 
 
 var TrackPlayer = React.createClass({
@@ -12,11 +14,15 @@ var TrackPlayer = React.createClass({
   },
 
   playClick: function () {
-    this.props.track.play();
+    this.play();
   },
 
   destroyClick: function () {
-    this.props.track.destroy();
+    this.destroy();
+  },
+
+  destroy: function () {
+    TrackActions.destroyTrack(this.props.track);
   },
 
   loopMessage: function () {
@@ -37,12 +43,36 @@ var TrackPlayer = React.createClass({
     }
   },
 
+  play: function () {
+    if (this.interval) { return; }
+
+    var currentNote = 0,
+        playBackStartTime = Date.now(),
+        roll = this.props.track["roll"],
+        delta;
+
+    this.interval = setInterval(function () {
+      if (currentNote < roll.length) {
+        delta = Date.now() - playBackStartTime;
+
+        if (delta >= roll[currentNote].time) {
+          var notes = roll[currentNote].notes || [];
+          KeyActions.groupUpdate(notes);
+          currentNote++;
+        }
+      } else {
+        clearInterval(this.interval);
+        delete this.interval;
+      }
+    }.bind(this), 1);
+  },
+
   loop: function () {
     if (this.interval) { return; }
 
     var currentNote = 0,
         playBackStartTime = Date.now(),
-        roll = this.props.track.attributes.roll,
+        roll = this.props.track["roll"],
         delta;
 
     this.interval = setInterval(function () {
@@ -67,7 +97,7 @@ var TrackPlayer = React.createClass({
 
     return (
       <div className="track">
-        <p className="track-name">{this.props.track.get('name')}</p>
+        <p className="track-name">{this.props.track.name}:</p>
         <button onClick={this.playClick}>Play</button>
         <button onClick={this.loopClick}>{this.loopMessage()}</button>
         <button onClick={this.destroyClick}>Delete</button>
