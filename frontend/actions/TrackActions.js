@@ -21,6 +21,21 @@ var TrackActions = {
       actionType: OrganConstants.RESET_TRACKS,
       tracks: tracks
     });
+  },
+
+  destroyTrack: function (track) {
+   AppDispatcher.dispatch({
+      actionType: OrganConstants.DESTROY_TRACK,
+      track: track
+    });
+  },
+
+  readTracks: function (tracks) {
+    debugger;
+    AppDispatcher.dispatch({
+      actionType: OrganConstants.READ_TRACKS,
+      tracks: tracks
+    });
   }
 };
 

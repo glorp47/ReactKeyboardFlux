@@ -37,7 +37,7 @@ var Recorder = React.createClass({
     if (this.isRecording()) {
       return "Stop Recording";
     } else if (this.isDoneRecording()) {
-      return "Done Recording";
+      return "Record New Session";
     } else {
       return "Start Recording";
     }
@@ -57,7 +57,7 @@ var Recorder = React.createClass({
     var hasTrack = this.isTrackNew();
 
     return (
-      <div className="controls">
+      <div className="recorder">
         <h3>Recorder</h3>
         <button onClick={this.recordClick} className="record-button">
           { this.recordingMessage() }
@@ -71,7 +71,7 @@ var Recorder = React.createClass({
   },
 
   saveTrack: function (e) {
-    this.state.track.set('name', prompt("please enter name"));
+    this.state.track.set('name', prompt("Type in the saved track name"));
     this.state.track.save();
   },
 

@@ -15,14 +15,12 @@ Track.prototype = {
   addNotes: function (notes) {
     var timeSlice = { time: this._timeDelta() };
     if (notes.length > 0) {
-      //there are actually some keys held down
       timeSlice.notes = notes;
     }
     this.attributes.roll.push(timeSlice);
   },
 
   completeRecording: function () {
-    //add an empty time slice to indicate the end
     this.addNotes([]);
   },
 
@@ -34,8 +32,12 @@ Track.prototype = {
     return this.attributes.roll.length === 0;
   },
 
+  destroy: function () {
+    TrackActions.destroyTrack(this.attributes.id);
+  },
+
   play: function () {
-    if (this.interval) { return; } // don't play if already in progress
+    if (this.interval) { return; }
 
     var currentNote = 0,
         playBackStartTime = Date.now(),
@@ -43,13 +45,10 @@ Track.prototype = {
         delta;
 
     this.interval = setInterval(function () {
-      // if there are still notes to be played
       if (currentNote < roll.length) {
         delta = Date.now() - playBackStartTime;
 
-        // if we are at a timeslice with a note, play it and move forward
         if (delta >= roll[currentNote].time) {
-          // memoize because the notes might not be set; thanks Rails!
           var notes = roll[currentNote].notes || [];
           KeyActions.groupUpdate(notes);
           currentNote++;
@@ -59,6 +58,35 @@ Track.prototype = {
         delete this.interval;
       }
     }.bind(this), 1);
+  },
+
+  loop: function (continueLoop) {
+    if (this.interval) { return; }
+
+    var currentNote = 0,
+        playBackStartTime = Date.now(),
+        roll = this.attributes.roll,
+        delta;
+
+    this.interval = setInterval(function () {
+      if (currentNote < roll.length) {
+        delta = Date.now() - playBackStartTime;
+
+        if (delta >= roll[currentNote].time) {
+          var notes = roll[currentNote].notes || [];
+          KeyActions.groupUpdate(notes);
+          currentNote++;
+        }
+      } else {
+        clearInterval(this.interval);
+        delete this.interval;
+        this.loop(continueLoop);
+      }
+    }.bind(this), 1);
+  },
+
+  stop: function () {
+    clearInterval(this.interval);
   },
 
   set: function (attr, val) {

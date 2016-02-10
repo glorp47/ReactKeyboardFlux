@@ -5,14 +5,19 @@ var $ = require('jquery')
 $(function () {
   var NOTE_MAP = {}, tones = Object.keys(window.TONES);
   var validKeys = [
-    65, // 'a'
-    83, // 's'
-    68, // 'd'
-    70, // 'f'
-    74, // 'j'
-    75, // 'k'
-    76, // 'l'
-    186 // ';'
+    65,
+  87,
+  83,
+  69,
+  68,
+  70,
+  89,
+  74,
+  85,
+  75,
+  73,
+  76,
+  186
   ];
   tones.forEach(function(tone, i) {
     NOTE_MAP[validKeys[i]] = tone;

@@ -12,7 +12,6 @@ var TrackApiUtil = {
       dataType: 'json',
       contentType: "application/json",
 
-      // See http://stackoverflow.com/questions/7203304/warning-cant-verify-csrf-token-authenticity-rails
       beforeSend: function(xhr) {xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'))},
 
       success: function (track) {
@@ -29,13 +28,30 @@ var TrackApiUtil = {
 
       TrackActions.resetTracks(tracks);
     });
+  },
+
+  destroyTrack: function (trackId) {
+    if (!trackId)
+    {return;}
+    $.ajax({
+      url: "/api/tracks/" + trackId,
+      type: "DELETE",
+      beforeSend: function(xhr) {xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'))},
+      success: function (trackId) {
+        TrackActions.destroyTrack(trackId)
+      }
+    });
   }
+
 };
 
 AppDispatcher.register(function(payload) {
   switch(payload.actionType){
   case OrganConstants.CREATE_TRACK:
     TrackApiUtil.createTrack(payload.track);
+    break;
+  case OrganConstants.DESTROY_TRACK:
+    TrackApiUtil.destroyTrack(payload.track);
     break;
   default:
   }

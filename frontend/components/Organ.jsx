@@ -2,8 +2,10 @@ var React = require('react'),
     NoteKey = require('../components/NoteKey'),
     JukeBox = require('../components/JukeBox'),
     Recorder = require('../components/Recorder'),
+    Controls = require('../components/Controls'),
     TONES = require("../constants/Tones"),
-    KeyStore = require('../stores/KeyStore');
+    KeyStore = require('../stores/KeyStore'),
+    FilterStore = require('../stores/FilterStore');
 
 var Organ = React.createClass({
   componentDidMount: function () {
@@ -11,10 +13,11 @@ var Organ = React.createClass({
   },
 
   getInitialState: function () {
-    return { notes: KeyStore.all() };
+    return { notes: KeyStore.all()};
   },
 
   render: function () {
+    var that = this;
     return (
       <div>
         <div className="keys group">
@@ -24,6 +27,7 @@ var Organ = React.createClass({
           })
         }
         </div>
+        <Controls />
         <Recorder />
         <JukeBox />
       </div>

@@ -1,8 +1,9 @@
 var ctx = new (window.AudioContext || window.webkitAudioContext)();
+var FilterStore = require('../stores/FilterStore.js');
 
 var createOscillator = function (freq) {
   var osc = ctx.createOscillator();
-  osc.type = "sine";
+  osc.type = FilterStore.waveform();
   osc.frequency.value = freq;
   osc.detune.value = 0;
   osc.start(ctx.currentTime);
@@ -24,8 +25,7 @@ var Note = function (freq) {
 
 Note.prototype = {
   start: function () {
-    // can't explain 0.3, it is a reasonable value
-    this.gainNode.gain.value = 0.3;
+    this.gainNode.gain.value = FilterStore.volume();
   },
 
   stop: function () {

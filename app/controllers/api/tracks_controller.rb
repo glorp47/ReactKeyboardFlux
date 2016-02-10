@@ -13,6 +13,13 @@ class Api::TracksController < ApplicationController
     end
   end
 
+  def destroy
+    @track = Track.find(params[:id])
+    @track.destroy
+    render json: @tracks
+  end
+
+
   private
 
   ROLL_FILTER = {:roll => [:time, :notes => []]}
