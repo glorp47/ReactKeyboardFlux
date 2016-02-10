@@ -37060,7 +37060,8 @@
 	        'button',
 	        { onClick: this.recordClick, className: 'record-button' },
 	        this.recordingMessage()
-	      )
+	      ),
+	      this.trackSavingElements()
 	    );
 	  },
 	
