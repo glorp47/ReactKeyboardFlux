@@ -37070,7 +37070,7 @@
 	  },
 	
 	  save: function () {
-	    if (this.attributes.roll.length === 0) {
+	    if (this.state.track.attributes.roll.length === 0) {
 	      throw "name can't be blank!";
 	    } else if (this.state.track.attributes.name === "") {
 	      throw "name can't be blank!";
