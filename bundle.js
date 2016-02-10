@@ -36858,7 +36858,7 @@
 	  displayName: 'TrackPlayer',
 	
 	  getInitialState: function () {
-	    return { looping: false };
+	    return { looping: false, deleted: false };
 	  },
 	
 	  isLooping: function () {
@@ -36870,15 +36870,24 @@
 	  },
 	
 	  destroyClick: function () {
-	    this.destroy();
+	    var that = this;
+	    this.setState({ looping: false, deleted: true });
+	
+	    setInterval(function () {
+	      if (!that.state.looping) {
+	        that.destroy();clearInterval();
+	      }
+	    }, 20);
+	    ;
 	  },
 	
 	  destroy: function () {
+	
 	    TrackActions.destroyTrack(this.props.track);
 	  },
 	
 	  loopMessage: function () {
-	    if (this.isLooping()) {
+	    if (this.isLooping() || this.state.deleted) {
 	      return "Stop Loop";
 	    } else {
 	      return "Start Loop";
@@ -36929,6 +36938,7 @@
 	    var currentNote = 0,
 	        playBackStartTime = Date.now(),
 	        roll = this.props.track["roll"],
+	        that = this,
 	        delta;
 	
 	    this.interval = setInterval(function () {
