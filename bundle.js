@@ -37037,7 +37037,6 @@
 	  recordClick: function (e) {
 	    if (this.state.recording) {
 	      this.state.track.completeRecording();
-	      this.saveTrack();
 	      this.setState({ recording: false });
 	    } else {
 	      this.setState({ recording: true });
