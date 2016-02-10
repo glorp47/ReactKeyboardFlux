@@ -26833,7 +26833,6 @@
 	
 	TrackStore._addTrack = function (track) {
 	  var idx = _tracks.indexOf(track);
-	  debugger;
 	  _tracks.push(track);
 	  this.__emitChange();
 	};
@@ -37070,10 +37069,10 @@
 	  },
 	
 	  save: function () {
-	    if (this.state.track.attributes.roll.length === 0) {
-	      throw "name can't be blank!";
+	    if (this.state.track.attributes.roll.length === 1) {
+	      throw "Notes can't be blank!";
 	    } else if (this.state.track.attributes.name === "") {
-	      throw "name can't be blank!";
+	      throw "Name can't be blank!";
 	    } else {
 	      TrackActions.addTrack(this.state.track.attributes);
 	      this.setState({ track: new Track() });

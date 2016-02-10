@@ -26,7 +26,6 @@ TrackStore.__onDispatch = function (payload) {
 
 TrackStore._addTrack = function (track) {
   var idx = _tracks.indexOf(track);
-  debugger;
     _tracks.push(track);
     this.__emitChange();
 };
