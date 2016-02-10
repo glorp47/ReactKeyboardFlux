@@ -46,6 +46,7 @@ var Recorder = React.createClass({
     if (this.state.recording) {
       this.state.track.completeRecording();
       this.setState({ recording: false });
+      this.saveTrack();
     } else {
       this.setState({ recording: true });
       this.state.track.startRecording();
@@ -61,7 +62,6 @@ var Recorder = React.createClass({
         <button onClick={this.recordClick} className="record-button">
           { this.recordingMessage() }
         </button>
-        {this.trackSavingElements()}
       </div>
     );
   },
@@ -76,7 +76,7 @@ var Recorder = React.createClass({
     {throw "Notes can't be blank!";}
     else if (this.state.track.attributes.name === "") {
       throw "Name can't be blank!";
-    } else {
+    } else if (!!this.state.track.attributes.name) {
       TrackActions.addTrack(this.state.track.attributes);
       this.setState({ track: new Track() });
     };

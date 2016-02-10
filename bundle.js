@@ -19681,6 +19681,11 @@
 	      'div',
 	      { className: 'container' },
 	      React.createElement(
+	        'h1',
+	        null,
+	        'Home Row Is The Key!'
+	      ),
+	      React.createElement(
 	        'div',
 	        { className: 'keys group' },
 	        Object.keys(TONES).map(function (noteName) {
@@ -37047,6 +37052,7 @@
 	    if (this.state.recording) {
 	      this.state.track.completeRecording();
 	      this.setState({ recording: false });
+	      this.saveTrack();
 	    } else {
 	      this.setState({ recording: true });
 	      this.state.track.startRecording();
@@ -37068,8 +37074,7 @@
 	        'button',
 	        { onClick: this.recordClick, className: 'record-button' },
 	        this.recordingMessage()
-	      ),
-	      this.trackSavingElements()
+	      )
 	    );
 	  },
 	
@@ -37083,7 +37088,7 @@
 	      throw "Notes can't be blank!";
 	    } else if (this.state.track.attributes.name === "") {
 	      throw "Name can't be blank!";
-	    } else {
+	    } else if (!!this.state.track.attributes.name) {
 	      TrackActions.addTrack(this.state.track.attributes);
 	      this.setState({ track: new Track() });
 	    };
