@@ -26789,8 +26789,6 @@
 	    return React.createElement(
 	      'div',
 	      { className: 'jukebox' },
-	      React.createElement('br', null),
-	      React.createElement('br', null),
 	      React.createElement(
 	        'h3',
 	        null,
@@ -36910,6 +36908,7 @@
 	  },
 	
 	  play: function () {
+	    this.setState({ looping: false });
 	    if (this.interval) {
 	      return;
 	    }
@@ -36978,17 +36977,17 @@
 	      ),
 	      React.createElement(
 	        'button',
-	        { onClick: this.playClick },
+	        { onClick: this.playClick, className: 'btn' },
 	        'Play'
 	      ),
 	      React.createElement(
 	        'button',
-	        { onClick: this.loopClick },
+	        { onClick: this.loopClick, className: 'btn' },
 	        this.loopMessage()
 	      ),
 	      React.createElement(
 	        'button',
-	        { onClick: this.destroyClick },
+	        { onClick: this.destroyClick, className: 'btn' },
 	        'Delete'
 	      )
 	    );
@@ -37098,7 +37097,7 @@
 	    if (this.isDoneRecording()) {
 	      return React.createElement(
 	        'button',
-	        { onClick: this.saveTrack, className: 'control' },
+	        { onClick: this.saveTrack, className: 'btn' },
 	        'Save Track'
 	      );
 	    }

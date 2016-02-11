@@ -49,6 +49,7 @@ var TrackPlayer = React.createClass({
   },
 
   play: function () {
+    this.setState({ looping: false })
     if (this.interval) { return; }
 
     var currentNote = 0,
@@ -104,9 +105,9 @@ var TrackPlayer = React.createClass({
     return (
       <div className="track">
         <p className="track-name">{this.props.track.name}:</p>
-        <button onClick={this.playClick}>Play</button>
-        <button onClick={this.loopClick}>{this.loopMessage()}</button>
-        <button onClick={this.destroyClick}>Delete</button>
+        <button onClick={this.playClick} className="btn">Play</button>
+        <button onClick={this.loopClick} className="btn">{this.loopMessage()}</button>
+        <button onClick={this.destroyClick} className="btn">Delete</button>
       </div>
     );
   }
