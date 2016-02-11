@@ -28,9 +28,13 @@ var Organ = React.createClass({
           })
         }
         </div>
+        <div>
         <Controls />
         <Recorder />
-        <JukeBox />
+          <div>
+          <JukeBox />
+          </div>
+        </div>
       </div>
    );
   },

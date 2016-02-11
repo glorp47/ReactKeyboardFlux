@@ -29,7 +29,7 @@ var React = require('react'),
             <input type="range" min="0" max="5" step=".3" value={this.state.volume} onChange={this.handleVolumeChange} />
             <span id="range"> {this.state.volume.toFixed(1)}</span>
             </div>
-            <div className="waveform changer">
+            <div className="waveform changer select-style">
             <h3>WAVEFORM TYPE</h3>
             <select value={this.state.waveform} onChange={this.handleWaveformChange}>
               <option value={'sine'}>SINE</option>

@@ -6,7 +6,7 @@ var React = require("react"),
 var TrackPlayer = React.createClass({
 
   getInitialState: function () {
-    return {looping: false, deleted: false};
+    return {looping: false, deleted: false, playing: false};
   },
 
   isLooping: function () {
@@ -31,7 +31,7 @@ var TrackPlayer = React.createClass({
   },
 
   loopMessage: function () {
-    if (this.isLooping() || this.state.deleted) {
+    if (this.isLooping() || this.state.deleted || this.state.playing) {
       return "Stop Loop";
     } else {
       return "Start Loop";
@@ -39,7 +39,7 @@ var TrackPlayer = React.createClass({
   },
 
   loopClick: function (e) {
-    if (this.state.looping) {
+    if (this.state.looping || this.state.playing) {
       this.setState({ looping: false });
     } else {
 
@@ -49,7 +49,7 @@ var TrackPlayer = React.createClass({
   },
 
   play: function () {
-    this.setState({ looping: false })
+    this.setState({ looping: false, playing: true })
     if (this.interval) { return; }
 
     var currentNote = 0,
@@ -67,6 +67,7 @@ var TrackPlayer = React.createClass({
           currentNote++;
         }
       } else {
+        this.setState({ playing: false })
         clearInterval(this.interval);
         delete this.interval;
       }
@@ -99,6 +100,8 @@ var TrackPlayer = React.createClass({
       }
     }.bind(this), 1);
   },
+
+
 
   render: function () {
 
